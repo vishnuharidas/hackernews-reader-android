@@ -1,0 +1,16 @@
+# Default ignored files
+# Discarding
+*.iml
+*.xml
+
+.name
+caches
+libraries
+modules
+
+# Retaining code styles, dictionaries, templates, inspection profiles, and run configurations
+!codeStyles/*.xml
+!dictionaries/*.xml
+!fileTemplates/*.*
+!inspectionProfiles/*.xml
+!runConfigurations/*.xml
