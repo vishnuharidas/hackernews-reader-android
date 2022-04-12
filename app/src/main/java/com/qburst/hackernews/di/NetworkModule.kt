@@ -13,9 +13,9 @@ import retrofit2.converter.gson.GsonConverterFactory
 object NetworkModule {
 
     @Provides
-    fun provideHackerNewsApi(
-        baseUrl: String = "https://hacker-news.firebaseio.com/v0/"
-    ): HackerNewsApi {
+    fun provideHackerNewsApi(): HackerNewsApi {
+
+        val baseUrl = "https://hacker-news.firebaseio.com/v0/"
 
         return Retrofit.Builder()
             .baseUrl(baseUrl)
