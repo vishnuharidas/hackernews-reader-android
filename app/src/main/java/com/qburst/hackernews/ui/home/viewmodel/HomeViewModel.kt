@@ -29,6 +29,8 @@ class HomeViewModel @Inject constructor(
                 _uiState = _uiState.from(it)
             }
         }
+
+        getTopStories()
     }
 
     fun getTopStories() {
