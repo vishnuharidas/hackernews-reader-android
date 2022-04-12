@@ -4,7 +4,7 @@ import com.qburst.hackernews.data.model.HNItem
 import com.qburst.hackernews.data.model.HNTopStories
 import retrofit2.Response
 import retrofit2.http.GET
-import retrofit2.http.Query
+import retrofit2.http.Path
 
 // Official HN API documentation: https://github.com/HackerNews/API
 interface HackerNewsApi {
@@ -14,7 +14,7 @@ interface HackerNewsApi {
 
     @GET("item/{storyId}.json")
     suspend fun getItemDetails(
-        @Query("storyId") storyId: Long
+        @Path("storyId") storyId: Long
     ): Response<HNItem>
 
 }
