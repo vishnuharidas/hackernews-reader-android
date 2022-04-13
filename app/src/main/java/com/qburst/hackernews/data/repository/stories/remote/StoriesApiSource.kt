@@ -1,4 +1,4 @@
-package com.qburst.hackernews.data.repository.topstories.remote
+package com.qburst.hackernews.data.repository.stories.remote
 
 import com.qburst.hackernews.data.model.HNItem
 import com.qburst.hackernews.data.model.HNTopStories
@@ -8,9 +8,9 @@ import retrofit2.Response
 import javax.inject.Inject
 
 
-class TopStoriesApiSource @Inject constructor(
+class StoriesApiSource @Inject constructor(
     private val hackerNewsApi: HackerNewsApi
-) : TopStoriesRemoteSource {
+) : StoriesRemoteSource {
 
 
     override suspend fun getTopStories(): Resource<HNTopStories> = withExceptionHandling {

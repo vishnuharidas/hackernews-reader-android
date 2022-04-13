@@ -1,8 +1,8 @@
-package com.qburst.hackernews.data.repository.topstories
+package com.qburst.hackernews.data.repository.stories
 
 import com.qburst.hackernews.data.model.HNItem
 import com.qburst.hackernews.data.model.Resource
-import com.qburst.hackernews.data.repository.topstories.remote.TopStoriesRemoteSource
+import com.qburst.hackernews.data.repository.stories.remote.StoriesRemoteSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
@@ -11,11 +11,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class TopStoriesRepository @Inject constructor(
-    private val remoteSource: TopStoriesRemoteSource
+class StoriesRepository @Inject constructor(
+    private val remoteSource: StoriesRemoteSource
 ) {
 
-    private val _topMap = mutableMapOf<Long, HNItem?>()
+    private val _topMap = LinkedHashMap<Long, HNItem?>()
 
     private val _topStoriesFlow = MutableStateFlow<Resource<List<HNItem>>>(Resource.None)
     val topStoriesFlow: Flow<Resource<List<HNItem>>> get() = _topStoriesFlow

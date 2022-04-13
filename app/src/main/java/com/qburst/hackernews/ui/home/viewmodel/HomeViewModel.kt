@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.qburst.hackernews.data.model.HNItem
 import com.qburst.hackernews.data.model.Resource
-import com.qburst.hackernews.data.repository.topstories.TopStoriesRepository
+import com.qburst.hackernews.data.repository.stories.StoriesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val topStoriesRepository: TopStoriesRepository
+    private val storiesRepository: StoriesRepository
 ) : ViewModel() {
 
     private var _uiState by mutableStateOf(HomeUiState())
@@ -25,7 +25,7 @@ class HomeViewModel @Inject constructor(
 
         // Collect the data until this VM scope is destroyed
         viewModelScope.launch {
-            topStoriesRepository.topStoriesFlow.collect {
+            storiesRepository.topStoriesFlow.collect {
                 _uiState = _uiState.from(it)
             }
         }
@@ -38,13 +38,13 @@ class HomeViewModel @Inject constructor(
         _uiState = _uiState.copy(state = HomeUiState.State.Loading)
 
         viewModelScope.launch {
-            topStoriesRepository.getTopStories()
+            storiesRepository.getTopStories()
         }
 
     }
 
     fun nextPage() = viewModelScope.launch {
-        topStoriesRepository.nextPage()
+        storiesRepository.nextPage()
     }
 
 }
