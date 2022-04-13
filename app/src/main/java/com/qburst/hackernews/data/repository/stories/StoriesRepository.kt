@@ -2,6 +2,7 @@ package com.qburst.hackernews.data.repository.stories
 
 import com.qburst.hackernews.data.model.HNItem
 import com.qburst.hackernews.data.model.Resource
+import com.qburst.hackernews.data.repository.stories.local.StoriesLocalSource
 import com.qburst.hackernews.data.repository.stories.remote.StoriesRemoteSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -12,7 +13,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class StoriesRepository @Inject constructor(
-    private val remoteSource: StoriesRemoteSource
+    private val remoteSource: StoriesRemoteSource,
+    private val localSource: StoriesLocalSource
 ) {
 
     private val _topMap = LinkedHashMap<Long, HNItem?>()
@@ -57,6 +59,9 @@ class StoriesRepository @Inject constructor(
 
                         item?.let { hnItem ->
                             _topMap[storyId] = hnItem
+
+                            // Keep a local copy for future use
+                            localSource.saveItem(hnItem)
 
                             // Emit the stories
                             _topStoriesFlow.emit(
