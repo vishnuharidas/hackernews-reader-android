@@ -18,18 +18,16 @@ class HomeViewModel @Inject constructor(
     private val storiesRepository: StoriesRepository
 ) : ViewModel() {
 
+    companion object {
+        private const val PAGE_SIZE = 20
+    }
+
     private var _uiState by mutableStateOf(HomeUiState())
     val uiState: HomeUiState get() = _uiState
 
+    private var topStories = LinkedHashMap<Long, HNItem?>()
+
     init {
-
-        // Collect the data until this VM scope is destroyed
-        viewModelScope.launch {
-            storiesRepository.topStoriesFlow.collect {
-                _uiState = _uiState.from(it)
-            }
-        }
-
         getTopStories()
     }
 
@@ -38,13 +36,75 @@ class HomeViewModel @Inject constructor(
         _uiState = _uiState.copy(state = HomeUiState.State.Loading)
 
         viewModelScope.launch {
-            storiesRepository.getTopStories()
+
+            storiesRepository.getTopStories().collect {
+
+                if (it is Resource.Success) {
+
+                    topStories.putAll(it.data)
+
+                    _uiState = _uiState.copy(totalCount = it.data.size)
+
+                    // Fetch the stories from the IDs
+                    fetchNextPage()
+
+                } else if (it is Resource.Error) {
+
+                    _uiState = _uiState.copy(
+                        state = HomeUiState.State.Error,
+                        totalCount = 0,
+                        error = it.throwable
+                    )
+                }
+
+            }
         }
 
     }
 
-    fun nextPage() = viewModelScope.launch {
-        storiesRepository.nextPage()
+    fun fetchNextPage() {
+
+        if (_uiState.state == HomeUiState.State.LoadingMore) { // Skip if already loading
+            return
+        }
+
+        val list = topStories.filter { it.value == null }
+
+        if (list.isEmpty()) return // Nothing to load now
+
+        _uiState = if (list.size == topStories.size) { // If all are NULL, then loading first time
+            _uiState.copy(state = HomeUiState.State.Loading)
+        } else { // Loading more.
+            _uiState.copy(state = HomeUiState.State.LoadingMore)
+        }
+
+        viewModelScope.launch {
+
+            storiesRepository.fetchStories(list.keys.take(PAGE_SIZE)).collect { resource ->
+
+                if (resource is Resource.Success) {
+
+                    resource.data.forEach { topStories[it.id] = it }
+
+                    _uiState = _uiState.copy(
+                        state = HomeUiState.State.Success,
+                        list = topStories.values.filterNotNull()
+                    )
+
+                } else if (resource is Resource.Error) {
+
+                    _uiState = _uiState.copy(
+                        state = HomeUiState.State.LoadingMoreError,
+                        totalCount = 0,
+                        error = resource.throwable
+                    )
+                }
+
+
+            }
+
+        }
+
     }
 
 }
@@ -52,6 +112,7 @@ class HomeViewModel @Inject constructor(
 data class HomeUiState(
     val state: State = State.None,
     val list: List<HNItem> = emptyList(),
+    val totalCount: Int = 0,
     val error: Throwable? = null
 ) {
     sealed class State {
@@ -61,23 +122,12 @@ data class HomeUiState(
         object Empty : State()
         object Error : State()
         object LoadingMore : State()
+        object LoadingMoreError : State()
     }
 }
 
-private fun HomeUiState.from(resource: Resource<List<HNItem>>): HomeUiState {
-
-    return when (resource) {
-
-        is Resource.Error -> this.copy(state = HomeUiState.State.Error, error = resource.throwable)
-
-        Resource.None -> this.copy(state = HomeUiState.State.None)
-
-        is Resource.Success ->
-            if (resource.data.isNullOrEmpty()) {
-                this.copy(state = HomeUiState.State.Empty)
-            } else {
-                this.copy(state = HomeUiState.State.Success, list = resource.data)
-            }
-    }
+fun HomeUiState.hasMore(): Boolean {
+    return this.state == HomeUiState.State.Success
+            && this.totalCount > 0
+            && this.list.size < totalCount
 }
-
