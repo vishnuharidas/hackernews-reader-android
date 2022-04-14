@@ -4,11 +4,8 @@ import com.qburst.hackernews.data.model.HNItem
 import com.qburst.hackernews.data.model.Resource
 import com.qburst.hackernews.data.repository.stories.local.StoriesLocalSource
 import com.qburst.hackernews.data.repository.stories.remote.StoriesRemoteSource
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -17,69 +14,52 @@ class StoriesRepository @Inject constructor(
     private val localSource: StoriesLocalSource
 ) {
 
-    private val _topMap = LinkedHashMap<Long, HNItem?>()
 
-    private val _topStoriesFlow = MutableStateFlow<Resource<List<HNItem>>>(Resource.None)
-    val topStoriesFlow: Flow<Resource<List<HNItem>>> get() = _topStoriesFlow
+    fun getTopStories() = flow {
 
-    fun getTopStories() {
+        when (val resource = remoteSource.getTopStories()) {
 
-        CoroutineScope(Dispatchers.IO).launch {
+            Resource.None -> {}
 
-            when (val resource = remoteSource.getTopStories()) {
+            is Resource.Error -> emit(resource)
 
-                Resource.None -> {}
+            is Resource.Success -> {
 
-                is Resource.Error -> _topStoriesFlow.emit(resource)
+                emit(
+                    Resource.Success(resource.data.associateWith { null })
+                )
 
-                is Resource.Success -> {
-
-                    // Add to the Map first, then fetch 10 items per page
-                    resource.data.forEach { _topMap[it] = null }
-
-                    nextPage()
-                }
             }
-
         }
 
     }
 
-    suspend fun nextPage() {
+    suspend fun fetchStories(ids: List<Long>) = flow {
 
-        CoroutineScope(Dispatchers.IO).launch {
+        val list = mutableListOf<HNItem>()
 
-            // Find the next 10 items with null values
-            coroutineScope {
+        coroutineScope {
 
-                _topMap.filter { it.value == null }.keys.take(10).forEach { storyId ->
+            ids.forEach { storyId ->
 
-                    launch {
-                        val item = getStoryDetails(storyId)
+                launch {
+                    val item = getStoryDetails(storyId)
 
-                        item?.let { hnItem ->
-                            _topMap[storyId] = hnItem
+                    item?.let { hnItem ->
 
-                            // Keep a local copy for future use
-                            localSource.saveItem(hnItem)
+                        // Keep a local copy for future use
+                        localSource.saveItem(hnItem)
 
-                            // Emit the stories
-                            _topStoriesFlow.emit(
-                                Resource.Success(_topMap.values.toList().filterNotNull())
-                            )
-                        }
+                        list.add(item)
                     }
-
-
                 }
             }
+        }
 
-            // If no data are available even after trying to fetch items, send an error text
-            if (_topMap.values.filterNotNull().isEmpty()) {
-                _topStoriesFlow.emit(
-                    Resource.Success(emptyList())
-                )
-            }
+        if (ids.size == list.size) {
+            emit(Resource.Success(list.toList()))
+        } else {
+            emit(Resource.Error(Throwable("Unable to fetch items at this time")))
         }
 
     }
