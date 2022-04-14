@@ -5,9 +5,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.qburst.hackernews.data.model.HNItem
 import com.qburst.hackernews.data.model.Resource
 import com.qburst.hackernews.data.repository.stories.StoriesRepository
+import com.qburst.hackernews.domain.GetItemsWithTimeAgoUseCase
+import com.qburst.hackernews.domain.model.HNItemWithTimeAgo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -22,10 +23,12 @@ class HomeViewModel @Inject constructor(
         private const val PAGE_SIZE = 20
     }
 
+    val getItemsWithTimeAgoUseCase: GetItemsWithTimeAgoUseCase = GetItemsWithTimeAgoUseCase(storiesRepository)
+
     private var _uiState by mutableStateOf(HomeUiState())
     val uiState: HomeUiState get() = _uiState
 
-    private var topStories = LinkedHashMap<Long, HNItem?>()
+    private var topStories = LinkedHashMap<Long, HNItemWithTimeAgo?>()
 
     init {
         getTopStories()
@@ -80,11 +83,11 @@ class HomeViewModel @Inject constructor(
 
         viewModelScope.launch {
 
-            storiesRepository.fetchStories(list.keys.take(PAGE_SIZE)).collect { resource ->
+            getItemsWithTimeAgoUseCase(list.keys.take(PAGE_SIZE)).collect { resource ->
 
                 if (resource is Resource.Success) {
 
-                    resource.data.forEach { topStories[it.id] = it }
+                    resource.data.forEach { topStories[it.item.id] = it }
 
                     _uiState = _uiState.copy(
                         state = HomeUiState.State.Success,
@@ -111,7 +114,7 @@ class HomeViewModel @Inject constructor(
 
 data class HomeUiState(
     val state: State = State.None,
-    val list: List<HNItem> = emptyList(),
+    val list: List<HNItemWithTimeAgo> = emptyList(),
     val totalCount: Int = 0,
     val error: Throwable? = null
 ) {
