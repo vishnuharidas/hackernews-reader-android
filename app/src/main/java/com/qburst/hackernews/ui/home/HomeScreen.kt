@@ -12,11 +12,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.qburst.hackernews.data.model.HNItem
+import com.qburst.hackernews.domain.model.HNItemWithTimeAgo
 import com.qburst.hackernews.ui.home.viewmodel.HomeUiState
 import com.qburst.hackernews.ui.home.viewmodel.HomeViewModel
 import com.qburst.hackernews.ui.home.viewmodel.hasMore
@@ -76,7 +82,7 @@ fun HomeScreen(
         HomeUiState.State.Success ->
             NewsList(
                 viewModel.uiState,
-                onClick = { item -> navController.navigate("details/${item.id}") },
+                onClick = { item -> navController.navigate("details/${item.item.id}") },
                 onMore = { if (viewModel.uiState.hasMore()) viewModel.fetchNextPage() }
             )
 
@@ -87,7 +93,7 @@ fun HomeScreen(
 @Composable
 private fun NewsList(
     uiState: HomeUiState,
-    onClick: (HNItem) -> Unit,
+    onClick: (HNItemWithTimeAgo) -> Unit,
     onMore: () -> Unit,
     onRetryPage: (() -> Unit)? = null,
 ) {
@@ -132,12 +138,11 @@ private fun NewsList(
 
             itemsIndexed(uiState.list) { index, item ->
 
-                Text(
-                    "$index\n${item.title}",
+                ListItem(
+                    item,
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { onClick(item) }
-                        .padding(16.dp)
                 )
 
             }
@@ -175,4 +180,60 @@ private fun NewsList(
         }
 
     }
+}
+
+@Composable
+private fun ListItem(
+    itemWithTimeAgo: HNItemWithTimeAgo,
+    modifier: Modifier = Modifier
+) {
+
+    Box(
+        modifier = modifier
+            .padding(16.dp)
+    ) {
+
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+
+            Text(
+                itemWithTimeAgo.item.title ?: "-",
+                style = TextStyle(
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Normal
+                )
+            )
+
+            val meta = buildAnnotatedString {
+
+                append(itemWithTimeAgo.item.score?.toString() ?: "0")
+                append(" points")
+                append(" by ")
+                withStyle(SpanStyle(fontWeight = FontWeight.Medium)){
+                    append(itemWithTimeAgo.item.by ?: "Unknown")
+                }
+
+                append(" posted ")
+                withStyle(SpanStyle(fontWeight = FontWeight.Medium)){
+                    append(itemWithTimeAgo.timeAgo ?: "recently")
+                }
+                append(" ago")
+
+                append("  \uD83D\uDCAC ")
+                append(itemWithTimeAgo.item.descendants?.toString() ?: "no comments")
+            }
+
+            Text(
+                meta,
+                style = TextStyle(
+                    color = Color.Gray
+                )
+            )
+
+
+        }
+
+    }
+
 }
