@@ -31,7 +31,7 @@ class StoriesApiSource @Inject constructor(
             if (response.isSuccessful) {
                 Resource.Success(response.body() as T)
             } else {
-                Resource.Error(Throwable(response.message()))
+                Resource.Error(Throwable(response.message() ?: response.code().toString()))
             }
 
         } catch (e: Exception) {
