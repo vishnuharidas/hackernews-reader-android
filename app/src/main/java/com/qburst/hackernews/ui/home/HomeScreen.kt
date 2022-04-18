@@ -25,13 +25,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.qburst.hackernews.data.model.HNItemType
 import com.qburst.hackernews.data.model.getTypeValue
 import com.qburst.hackernews.domain.model.HNItemWithTimeAgo
 import com.qburst.hackernews.ui.home.viewmodel.HomeUiState
 import com.qburst.hackernews.ui.home.viewmodel.HomeViewModel
 import com.qburst.hackernews.ui.home.viewmodel.hasMore
-import kotlinx.coroutines.flow.collect
 
 
 @Composable
@@ -42,66 +43,65 @@ fun HomeScreen(
 
     val context = LocalContext.current
 
-    when (viewModel.uiState.state) {
+    SwipeRefresh(
+        state = rememberSwipeRefreshState(isRefreshing = viewModel.uiState.state == HomeUiState.State.Loading),
+        onRefresh = {
+            viewModel.getTopStories(force = true)
+        },
+        modifier = Modifier.fillMaxSize()
+    ) {
 
-        HomeUiState.State.None,
-        HomeUiState.State.Empty -> Box(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
-            Text(
-                "No stories at this time. Please try later.",
+        when (viewModel.uiState.state) {
+
+            HomeUiState.State.None,
+            HomeUiState.State.Empty -> Box(
                 modifier = Modifier
-                    .align(Alignment.Center)
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                textAlign = TextAlign.Center
-            )
+                    .fillMaxSize()
+            ) {
+                Text(
+                    "No stories at this time. Please try later.",
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            HomeUiState.State.Error -> Box(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Text(
+                    viewModel.uiState.error?.localizedMessage ?: "Unknown error. Please try later.",
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            HomeUiState.State.Loading,
+            HomeUiState.State.LoadingMore,
+            HomeUiState.State.LoadingMoreError,
+            HomeUiState.State.Success ->
+                NewsList(
+                    viewModel.uiState,
+                    onClick = {
+                        // TODO item -> navController.navigate("details/${item.item.id}")
+
+                        if (it.item.getTypeValue() == HNItemType.Story
+                            && it.item.title?.startsWith("Ask HN:") == false /* Ask HN will be opened in a screen */) {
+                            context.startActivity(
+                                Intent(Intent.ACTION_VIEW, Uri.parse(it.item.url))
+                            )
+                        }
+
+                    },
+                    onMore = { if (viewModel.uiState.hasMore()) viewModel.fetchNextPage() }
+                )
+
         }
-
-        HomeUiState.State.Error -> Box(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Text(
-                viewModel.uiState.error?.localizedMessage ?: "Unknown error. Please try later.",
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                textAlign = TextAlign.Center
-            )
-        }
-
-        HomeUiState.State.Loading -> Box(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .width(40.dp)
-                    .align(Alignment.Center),
-                strokeWidth = 1.dp
-            )
-        }
-
-        HomeUiState.State.LoadingMore,
-        HomeUiState.State.LoadingMoreError,
-        HomeUiState.State.Success ->
-            NewsList(
-                viewModel.uiState,
-                onClick = {
-                    // TODO item -> navController.navigate("details/${item.item.id}")
-
-                    if (it.item.getTypeValue() == HNItemType.Story
-                        && it.item.title?.startsWith("Ask HN:") == false /* Ask HN will be opened in a screen */) {
-                        context.startActivity(
-                            Intent(Intent.ACTION_VIEW, Uri.parse(it.item.url))
-                        )
-                    }
-
-                },
-                onMore = { if (viewModel.uiState.hasMore()) viewModel.fetchNextPage() }
-            )
 
     }
 

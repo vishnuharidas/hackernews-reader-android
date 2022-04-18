@@ -10,7 +10,6 @@ import com.qburst.hackernews.data.repository.stories.StoriesRepository
 import com.qburst.hackernews.domain.GetItemsWithTimeAgoUseCase
 import com.qburst.hackernews.domain.model.HNItemWithTimeAgo
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -34,9 +33,13 @@ class HomeViewModel @Inject constructor(
         getTopStories()
     }
 
-    fun getTopStories() {
+    fun getTopStories(force: Boolean = false) {
 
         _uiState = _uiState.copy(state = HomeUiState.State.Loading)
+
+        if(force){
+            topStories.clear()
+        }
 
         viewModelScope.launch {
 
