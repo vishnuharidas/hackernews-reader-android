@@ -14,8 +14,13 @@ class ItemsRepository @Inject constructor(
     private val localSource: ItemsLocalSource
 ) {
 
+    fun getTopStories(force: Boolean = false) = flow {
 
-    fun getTopStories() = flow {
+        // Use the local cached copy if not forcing
+        if (!force && localSource.isValid()) {
+            emit(Resource.Success(localSource.getTopStories()))
+            return@flow
+        }
 
         when (val resource = remoteSource.getTopStories()) {
 
@@ -26,8 +31,11 @@ class ItemsRepository @Inject constructor(
             is Resource.Success -> {
 
                 emit(
-                    Resource.Success(resource.data.associateWith { null })
+                    Resource.Success(resource.data)
                 )
+
+                // save a local copy
+                localSource.saveTopStories(resource.data)
 
             }
         }
