@@ -1,16 +1,21 @@
 package com.qburst.hackernews.ui.story_details
 
+import android.content.Intent
+import android.net.Uri
 import android.text.Html
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
-import androidx.compose.material.Text
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ArrowForward
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -21,6 +26,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.qburst.hackernews.data.model.HNItem
+import com.qburst.hackernews.data.model.HNItemType
+import com.qburst.hackernews.data.model.getTypeValue
 import com.qburst.hackernews.domain.GetTimeAgoUseCase
 import com.qburst.hackernews.ui.story_details.viewmodel.ItemDetailsUiState
 import com.qburst.hackernews.ui.story_details.viewmodel.ItemDetailsViewModel
@@ -72,19 +79,53 @@ private fun ItemDetails(
     item: HNItem,
     modifier: Modifier = Modifier
 ) {
+
+    val context = LocalContext.current
+
     Column(
         modifier = modifier
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
 
-        Text(
-            item.title ?: "-",
-            style = TextStyle(
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Normal
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.Top
+        ) {
+
+            Text(
+                item.title ?: "-",
+                style = TextStyle(
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Normal
+                ),
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = if (item.url != null) 8.dp else 0.dp)
             )
-        )
+
+            if (item.url != null) {
+                IconButton(
+                    onClick = {
+
+                        if (item.getTypeValue() == HNItemType.Story
+                            && item.title?.startsWith("Ask HN:") == false /* Ask HN will be opened in a screen */) {
+                            context.startActivity(
+                                Intent(Intent.ACTION_VIEW, Uri.parse(item.url))
+                            )
+                        }
+
+                    },
+                    modifier = Modifier
+                        .border(width = 1.dp, color = Color.LightGray, shape = CircleShape)
+                ) {
+
+                    Icon(Icons.Outlined.ArrowForward, contentDescription = "Open in Browser")
+
+                }
+            }
+
+        }
 
         val meta = buildAnnotatedString {
 
