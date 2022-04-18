@@ -19,7 +19,7 @@ class GetItemsWithTimeAgoUseCase(
     }
 
     suspend operator fun invoke(list: List<Long>): Flow<Resource<List<HNItemWithTimeAgo>>> =
-        repository.fetchItems(list).map {
+        repository.fetchItems(list, force = true).map {
 
             when (it) {
                 is Resource.Success -> {
