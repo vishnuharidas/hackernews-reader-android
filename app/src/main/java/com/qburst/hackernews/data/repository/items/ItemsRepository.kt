@@ -44,7 +44,7 @@ class ItemsRepository @Inject constructor(
 
     }
 
-    suspend fun fetchItems(ids: List<Long>) = flow {
+    suspend fun fetchItems(ids: List<Long>, force: Boolean = false) = flow {
 
         val list = mutableListOf<HNItem>()
 
@@ -53,7 +53,7 @@ class ItemsRepository @Inject constructor(
             ids.forEach { itemId ->
 
                 launch {
-                    val item = getItemDetails(itemId)
+                    val item = getItemDetails(itemId, force = force)
 
                     item?.let { hnItem ->
 
