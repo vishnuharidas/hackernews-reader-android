@@ -1,7 +1,5 @@
 package com.qburst.hackernews.ui.home
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -27,8 +25,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
-import com.qburst.hackernews.data.model.HNItemType
-import com.qburst.hackernews.data.model.getTypeValue
 import com.qburst.hackernews.domain.model.HNItemWithTimeAgo
 import com.qburst.hackernews.ui.home.viewmodel.HomeUiState
 import com.qburst.hackernews.ui.home.viewmodel.HomeViewModel
@@ -88,14 +84,15 @@ fun HomeScreen(
                 NewsList(
                     viewModel.uiState,
                     onClick = {
-                        // TODO item -> navController.navigate("details/${item.item.id}")
 
-                        if (it.item.getTypeValue() == HNItemType.Story
-                            && it.item.title?.startsWith("Ask HN:") == false /* Ask HN will be opened in a screen */) {
+                        navController.navigate("details/${it.item.id}")
+
+                        /*if (it.item.getTypeValue() == HNItemType.Story
+                            && it.item.title?.startsWith("Ask HN:") == false *//* Ask HN will be opened in a screen *//*) {
                             context.startActivity(
                                 Intent(Intent.ACTION_VIEW, Uri.parse(it.item.url))
                             )
-                        }
+                        }*/
 
                     },
                     onMore = { if (viewModel.uiState.hasMore()) viewModel.fetchNextPage() }
@@ -227,12 +224,12 @@ private fun ListItem(
                 append(itemWithTimeAgo.item.score?.toString() ?: "0")
                 append(" points")
                 append(" by ")
-                withStyle(SpanStyle(fontWeight = FontWeight.Medium)){
+                withStyle(SpanStyle(fontWeight = FontWeight.Medium)) {
                     append(itemWithTimeAgo.item.by ?: "Unknown")
                 }
 
                 append(" posted ")
-                withStyle(SpanStyle(fontWeight = FontWeight.Medium)){
+                withStyle(SpanStyle(fontWeight = FontWeight.Medium)) {
                     append(itemWithTimeAgo.timeAgo ?: "recently")
                 }
                 append(" ago")
