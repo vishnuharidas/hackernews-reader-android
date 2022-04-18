@@ -2,6 +2,8 @@ package com.qburst.hackernews.ui.story_details
 
 import android.text.Html
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
@@ -72,6 +74,7 @@ private fun ItemDetails(
 ) {
     Column(
         modifier = modifier
+            .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
 
