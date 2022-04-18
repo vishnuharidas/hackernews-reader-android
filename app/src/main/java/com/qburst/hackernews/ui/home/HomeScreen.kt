@@ -1,5 +1,7 @@
 package com.qburst.hackernews.ui.home
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -22,6 +25,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.qburst.hackernews.data.model.HNItemType
+import com.qburst.hackernews.data.model.getTypeValue
 import com.qburst.hackernews.domain.model.HNItemWithTimeAgo
 import com.qburst.hackernews.ui.home.viewmodel.HomeUiState
 import com.qburst.hackernews.ui.home.viewmodel.HomeViewModel
@@ -34,6 +39,8 @@ fun HomeScreen(
     navController: NavHostController,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
+
+    val context = LocalContext.current
 
     when (viewModel.uiState.state) {
 
@@ -82,7 +89,17 @@ fun HomeScreen(
         HomeUiState.State.Success ->
             NewsList(
                 viewModel.uiState,
-                onClick = { item -> navController.navigate("details/${item.item.id}") },
+                onClick = {
+                    // TODO item -> navController.navigate("details/${item.item.id}")
+
+                    if (it.item.getTypeValue() == HNItemType.Story
+                        && it.item.title?.startsWith("Ask HN:") == false /* Ask HN will be opened in a screen */) {
+                        context.startActivity(
+                            Intent(Intent.ACTION_VIEW, Uri.parse(it.item.url))
+                        )
+                    }
+
+                },
                 onMore = { if (viewModel.uiState.hasMore()) viewModel.fetchNextPage() }
             )
 
