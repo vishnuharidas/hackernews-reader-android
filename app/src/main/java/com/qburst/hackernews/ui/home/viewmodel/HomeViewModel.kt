@@ -43,11 +43,11 @@ class HomeViewModel @Inject constructor(
 
         viewModelScope.launch {
 
-            itemsRepository.getTopStories().collect {
+            itemsRepository.getTopStories(force = force).collect {
 
                 if (it is Resource.Success) {
 
-                    topStories.putAll(it.data)
+                    topStories.putAll(it.data.associateWith { null })
 
                     _uiState = _uiState.copy(totalCount = it.data.size)
 
