@@ -8,7 +8,9 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class ItemsRepository @Inject constructor(
     private val remoteSource: ItemsRemoteSource,
     private val localSource: ItemsLocalSource
@@ -72,13 +74,23 @@ class ItemsRepository @Inject constructor(
 
     }
 
+    suspend fun getItemDetails(itemId: Long, force: Boolean = false): HNItem? {
 
-    private suspend fun getItemDetails(itemId: Long): HNItem? {
+        // Use the local cached copy if not forcing
+        if (!force && localSource.isValid()) {
+            return localSource.getItemById(itemId = itemId)
+        }
+
 
         return when (val res = remoteSource.getItemDetails(itemId = itemId)) {
-            is Resource.Error -> null
+
+            is Resource.Error,
             Resource.None -> null
-            is Resource.Success -> res.data
+
+            is Resource.Success -> {
+                localSource.saveItem(res.data)
+                res.data
+            }
         }
 
     }
