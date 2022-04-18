@@ -1,13 +1,13 @@
 package com.qburst.hackernews.domain
 
 import com.qburst.hackernews.data.model.Resource
-import com.qburst.hackernews.data.repository.stories.StoriesRepository
+import com.qburst.hackernews.data.repository.items.ItemsRepository
 import com.qburst.hackernews.domain.model.HNItemWithTimeAgo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class GetItemsWithTimeAgoUseCase(
-    private val repository: StoriesRepository,
+    private val repository: ItemsRepository,
     private val default: String = "sometime ago"
 ) {
 
@@ -19,7 +19,7 @@ class GetItemsWithTimeAgoUseCase(
     }
 
     suspend operator fun invoke(list: List<Long>): Flow<Resource<List<HNItemWithTimeAgo>>> =
-        repository.fetchStories(list).map {
+        repository.fetchItems(list).map {
 
             when (it) {
                 is Resource.Success -> {

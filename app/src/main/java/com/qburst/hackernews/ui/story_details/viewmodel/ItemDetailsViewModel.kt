@@ -6,14 +6,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class StoryDetailsViewModel @Inject constructor(
+class ItemDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val storyId: Long = savedStateHandle.get("storyId") ?: 0L
+    private val itemId: Long = savedStateHandle.get("itemId") ?: 0L
 
     init {
-        println("SAVED STATE: STORY ID = $storyId")
+        println("SAVED STATE: STORY ID = $itemId")
     }
 
 }

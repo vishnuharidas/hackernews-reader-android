@@ -1,4 +1,4 @@
-package com.qburst.hackernews.data.repository.stories.remote
+package com.qburst.hackernews.data.repository.items.remote
 
 import com.qburst.hackernews.data.model.HNItem
 import com.qburst.hackernews.data.model.HNTopStories
@@ -8,9 +8,9 @@ import retrofit2.Response
 import javax.inject.Inject
 
 
-class StoriesApiSource @Inject constructor(
+class ItemsApiSource @Inject constructor(
     private val hackerNewsApi: HackerNewsApi
-) : StoriesRemoteSource {
+) : ItemsRemoteSource {
 
 
     override suspend fun getTopStories(): Resource<HNTopStories> = withExceptionHandling {
@@ -18,8 +18,8 @@ class StoriesApiSource @Inject constructor(
     }
 
 
-    override suspend fun getStoryDetails(storyId: Long): Resource<HNItem> = withExceptionHandling {
-        hackerNewsApi.getItemDetails(storyId = storyId)
+    override suspend fun getItemDetails(itemId: Long): Resource<HNItem> = withExceptionHandling {
+        hackerNewsApi.getItemDetails(itemId = itemId)
     }
 
 

@@ -6,7 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.qburst.hackernews.data.model.Resource
-import com.qburst.hackernews.data.repository.stories.StoriesRepository
+import com.qburst.hackernews.data.repository.items.ItemsRepository
 import com.qburst.hackernews.domain.GetItemsWithTimeAgoUseCase
 import com.qburst.hackernews.domain.model.HNItemWithTimeAgo
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,14 +15,14 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val storiesRepository: StoriesRepository
+    private val itemsRepository: ItemsRepository
 ) : ViewModel() {
 
     companion object {
         private const val PAGE_SIZE = 20
     }
 
-    val getItemsWithTimeAgoUseCase: GetItemsWithTimeAgoUseCase = GetItemsWithTimeAgoUseCase(storiesRepository)
+    val getItemsWithTimeAgoUseCase: GetItemsWithTimeAgoUseCase = GetItemsWithTimeAgoUseCase(itemsRepository)
 
     private var _uiState by mutableStateOf(HomeUiState())
     val uiState: HomeUiState get() = _uiState
@@ -37,13 +37,13 @@ class HomeViewModel @Inject constructor(
 
         _uiState = _uiState.copy(state = HomeUiState.State.Loading)
 
-        if(force){
+        if (force) {
             topStories.clear()
         }
 
         viewModelScope.launch {
 
-            storiesRepository.getTopStories().collect {
+            itemsRepository.getTopStories().collect {
 
                 if (it is Resource.Success) {
 

@@ -1,8 +1,8 @@
-package com.qburst.hackernews.data.repository.stories.local
+package com.qburst.hackernews.data.repository.items.local
 
 import com.qburst.hackernews.data.model.HNItem
 
-interface StoriesLocalSource {
+interface ItemsLocalSource {
 
     suspend fun saveItem(item: HNItem)
 

@@ -12,9 +12,9 @@ interface HackerNewsApi {
     @GET("topstories.json")
     suspend fun getTopStories(): Response<HNTopStories>
 
-    @GET("item/{storyId}.json")
+    @GET("item/{itemId}.json")
     suspend fun getItemDetails(
-        @Path("storyId") storyId: Long
+        @Path("itemId") itemId: Long
     ): Response<HNItem>
 
 }

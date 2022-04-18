@@ -4,13 +4,13 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.qburst.hackernews.ui.story_details.viewmodel.StoryDetailsViewModel
+import com.qburst.hackernews.ui.story_details.viewmodel.ItemDetailsViewModel
 
 @Composable
-fun StoryDetails(
+fun ItemDetailsScreen(
     navController: NavHostController,
-    storyId: Long,
-    viewModel: StoryDetailsViewModel = hiltViewModel()
+    itemId: Long,
+    viewModel: ItemDetailsViewModel = hiltViewModel()
 ) {
-    Text("Story Details: $storyId")
+    Text("Story Details: $itemId")
 }

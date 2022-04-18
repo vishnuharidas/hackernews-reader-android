@@ -1,13 +1,13 @@
-package com.qburst.hackernews.data.repository.stories.local
+package com.qburst.hackernews.data.repository.items.local
 
 import com.qburst.hackernews.data.model.HNItem
 
-class StoriesMemorySource : StoriesLocalSource {
+class ItemsMemorySource : ItemsLocalSource {
 
-    private val storiesMap = HashMap<Long, HNItem?>()
+    private val itemsMap = HashMap<Long, HNItem?>()
 
     override suspend fun saveItem(item: HNItem) {
-        storiesMap[item.id] = item
+        itemsMap[item.id] = item
     }
 
     override suspend fun saveItems(items: List<HNItem>) {
@@ -15,10 +15,10 @@ class StoriesMemorySource : StoriesLocalSource {
     }
 
     override suspend fun getItemById(itemId: Long): HNItem? {
-        return storiesMap[itemId]
+        return itemsMap[itemId]
     }
 
     override suspend fun getItemsById(list: List<Long>): List<HNItem?> {
-        return list.map { storiesMap[it] }
+        return list.map { itemsMap[it] }
     }
 }

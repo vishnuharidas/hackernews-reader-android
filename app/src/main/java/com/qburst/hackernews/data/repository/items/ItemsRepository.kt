@@ -1,17 +1,17 @@
-package com.qburst.hackernews.data.repository.stories
+package com.qburst.hackernews.data.repository.items
 
 import com.qburst.hackernews.data.model.HNItem
 import com.qburst.hackernews.data.model.Resource
-import com.qburst.hackernews.data.repository.stories.local.StoriesLocalSource
-import com.qburst.hackernews.data.repository.stories.remote.StoriesRemoteSource
+import com.qburst.hackernews.data.repository.items.local.ItemsLocalSource
+import com.qburst.hackernews.data.repository.items.remote.ItemsRemoteSource
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class StoriesRepository @Inject constructor(
-    private val remoteSource: StoriesRemoteSource,
-    private val localSource: StoriesLocalSource
+class ItemsRepository @Inject constructor(
+    private val remoteSource: ItemsRemoteSource,
+    private val localSource: ItemsLocalSource
 ) {
 
 
@@ -34,16 +34,16 @@ class StoriesRepository @Inject constructor(
 
     }
 
-    suspend fun fetchStories(ids: List<Long>) = flow {
+    suspend fun fetchItems(ids: List<Long>) = flow {
 
         val list = mutableListOf<HNItem>()
 
         coroutineScope {
 
-            ids.forEach { storyId ->
+            ids.forEach { itemId ->
 
                 launch {
-                    val item = getStoryDetails(storyId)
+                    val item = getItemDetails(itemId)
 
                     item?.let { hnItem ->
 
@@ -65,9 +65,9 @@ class StoriesRepository @Inject constructor(
     }
 
 
-    private suspend fun getStoryDetails(storyId: Long): HNItem? {
+    private suspend fun getItemDetails(itemId: Long): HNItem? {
 
-        return when (val res = remoteSource.getStoryDetails(storyId = storyId)) {
+        return when (val res = remoteSource.getItemDetails(itemId = itemId)) {
             is Resource.Error -> null
             Resource.None -> null
             is Resource.Success -> res.data

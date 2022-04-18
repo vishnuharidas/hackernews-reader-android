@@ -1,12 +1,12 @@
-package com.qburst.hackernews.data.repository.stories.remote
+package com.qburst.hackernews.data.repository.items.remote
 
 import com.qburst.hackernews.data.model.HNItem
 import com.qburst.hackernews.data.model.HNTopStories
 import com.qburst.hackernews.data.model.Resource
 
-interface StoriesRemoteSource {
+interface ItemsRemoteSource {
 
     suspend fun getTopStories(): Resource<HNTopStories>
 
-    suspend fun getStoryDetails(storyId: Long): Resource<HNItem>
+    suspend fun getItemDetails(itemId: Long): Resource<HNItem>
 }
