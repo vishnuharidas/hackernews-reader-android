@@ -19,7 +19,7 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
 
     companion object {
-        private const val PAGE_SIZE = 50
+        private const val PAGE_SIZE = 20
     }
 
     val getItemsWithTimeAgoUseCase: GetItemsWithTimeAgoUseCase = GetItemsWithTimeAgoUseCase(itemsRepository)
