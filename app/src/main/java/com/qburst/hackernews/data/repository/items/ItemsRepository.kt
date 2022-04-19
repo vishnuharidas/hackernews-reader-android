@@ -22,6 +22,8 @@ class ItemsRepository @Inject constructor(
         if (!force && localSource.isValid()) {
             emit(Resource.Success(localSource.getTopStories()))
             return@flow
+        } else { // Force, clear the data
+            localSource.clearAll()
         }
 
         when (val resource = remoteSource.getTopStories()) {
