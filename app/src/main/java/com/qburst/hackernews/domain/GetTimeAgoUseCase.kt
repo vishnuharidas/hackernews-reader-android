@@ -7,7 +7,7 @@ object GetTimeAgoUseCase {
     private const val HOUR_MILLIS = 60 * MINUTE_MILLIS
     private const val DAY_MILLIS = 24 * HOUR_MILLIS
 
-    operator fun invoke(t: Long?, default: String = "sometime"): String {
+    operator fun invoke(t: Long?, default: String = "sometime ago"): String {
 
         t ?: return default
 
@@ -29,19 +29,19 @@ object GetTimeAgoUseCase {
                 "a minute ago"
             }
             diff < 50 * MINUTE_MILLIS -> {
-                "${diff / MINUTE_MILLIS} minutes"
+                "${diff / MINUTE_MILLIS} minutes ago"
             }
             diff < 90 * MINUTE_MILLIS -> {
                 "an hour ago"
             }
             diff < 24 * HOUR_MILLIS -> {
-                "${diff / HOUR_MILLIS} hours"
+                "${diff / HOUR_MILLIS} hours ago"
             }
             diff < 48 * HOUR_MILLIS -> {
                 "yesterday"
             }
             else -> {
-                "${diff / DAY_MILLIS} days"
+                "${diff / DAY_MILLIS} days ago"
             }
         }
     }
