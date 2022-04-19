@@ -19,4 +19,5 @@ interface ItemsLocalSource {
 
     suspend fun getItemsById(list: List<Long>): List<HNItem?>
 
+    suspend fun clearAll()
 }

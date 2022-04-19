@@ -52,4 +52,10 @@ class ItemsMemorySource : ItemsLocalSource {
     override suspend fun getItemsById(list: List<Long>): List<HNItem?> {
         return list.map { itemsMap[it] }
     }
+
+    override suspend fun clearAll() {
+        topStories.clear()
+        itemsMap.clear()
+        cachedAt = 0L
+    }
 }
