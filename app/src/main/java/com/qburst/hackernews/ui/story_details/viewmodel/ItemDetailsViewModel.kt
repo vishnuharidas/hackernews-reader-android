@@ -7,6 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.qburst.hackernews.data.model.HNItem
+import com.qburst.hackernews.data.model.Resource
 import com.qburst.hackernews.data.repository.items.ItemsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -40,13 +41,54 @@ class ItemDetailsViewModel @Inject constructor(
 
             _uiState = if (item != null) {
                 _uiState.copy(
-                    state = ItemDetailsUiState.State.Success(item)
+                    state = ItemDetailsUiState.State.Success,
+                    item = item,
+                    comments = emptyList()
                 )
             } else {
                 _uiState.copy(
-                    state = ItemDetailsUiState.State.Failure("Unable to get item details now.")
+                    state = ItemDetailsUiState.State.Failure,
+                    error = "Unable to get item details now."
                 )
             }
+
+        }
+
+    }
+
+    fun fetchNextComments() {
+
+        val item = _uiState.item ?: return
+
+        val fullIds = item.kids ?: emptyList()
+
+        if (fullIds.isNullOrEmpty()) return
+
+        val loadedIds = _uiState.comments?.map { it.id } ?: emptyList()
+
+        // Take 10 comments, and then fetch them.
+        val nextIds = fullIds - loadedIds
+
+        if (nextIds.isNullOrEmpty()) return
+
+        viewModelScope.launch {
+
+            _uiState = _uiState.copy(
+                state = ItemDetailsUiState.State.LoadingMore
+            )
+
+            itemsRepository.fetchItems(nextIds.take(10)).collect {
+
+                if (it is Resource.Success) {
+
+                    _uiState = _uiState.copy(
+                        state = ItemDetailsUiState.State.Success,
+                        comments = _uiState.comments?.plus(it.data)
+                    )
+
+                }
+            }
+
 
         }
 
@@ -56,13 +98,15 @@ class ItemDetailsViewModel @Inject constructor(
 
 data class ItemDetailsUiState(
     val state: State,
+    val item: HNItem? = null,
     val comments: List<HNItem>? = null,
     val error: String? = null
 ) {
     sealed class State {
         object Loading : State()
-        class Success(val item: HNItem) : State()
-        class Failure(val error: String) : State()
+        object LoadingMore : State()
+        object Success : State()
+        object Failure : State()
     }
 
 }
