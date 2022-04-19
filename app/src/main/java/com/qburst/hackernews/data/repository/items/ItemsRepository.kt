@@ -78,7 +78,8 @@ class ItemsRepository @Inject constructor(
 
         // Use the local cached copy if not forcing
         if (!force && localSource.isValid()) {
-            return localSource.getItemById(itemId = itemId)
+            val item = localSource.getItemById(itemId = itemId)
+            if (item != null) return item
         }
 
 
