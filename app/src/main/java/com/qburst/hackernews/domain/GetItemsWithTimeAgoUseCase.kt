@@ -20,8 +20,8 @@ class GetItemsWithTimeAgoUseCase(
         private const val DAY_MILLIS = 24 * HOUR_MILLIS
     }
 
-    suspend operator fun invoke(list: List<Long>): Flow<Resource<List<HNItemWithTimeAgo>>> =
-        repository.fetchItems(list, force = true).map {
+    suspend operator fun invoke(list: List<Long>, force: Boolean = false): Flow<Resource<List<HNItemWithTimeAgo>>> =
+        repository.fetchItems(list, force = force).map {
 
             when (it) {
                 is Resource.Success -> {
