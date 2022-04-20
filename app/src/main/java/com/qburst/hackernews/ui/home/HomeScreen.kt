@@ -12,7 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -36,8 +35,6 @@ fun HomeScreen(
     navController: NavHostController,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-
-    val context = LocalContext.current
 
     SwipeRefresh(
         state = rememberSwipeRefreshState(isRefreshing = viewModel.uiState.state == HomeUiState.State.Loading),
@@ -87,13 +84,6 @@ fun HomeScreen(
 
                         navController.navigate("details/${it.item.id}")
 
-                        /*if (it.item.getTypeValue() == HNItemType.Story
-                            && it.item.title?.startsWith("Ask HN:") == false *//* Ask HN will be opened in a screen *//*) {
-                            context.startActivity(
-                                Intent(Intent.ACTION_VIEW, Uri.parse(it.item.url))
-                            )
-                        }*/
-
                     },
                     onMore = { if (viewModel.uiState.hasMore()) viewModel.fetchNextPage() }
                 )
@@ -109,7 +99,6 @@ private fun NewsList(
     uiState: HomeUiState,
     onClick: (HNItemWithTimeAgo) -> Unit,
     onMore: () -> Unit,
-    onRetryPage: (() -> Unit)? = null,
 ) {
 
     val onLoadMore by rememberUpdatedState(onMore)
@@ -130,7 +119,7 @@ private fun NewsList(
 
             val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull() ?: return@derivedStateOf true
 
-            lastVisibleItem.index >= listState.layoutInfo.totalItemsCount - 2 // 2nd last item
+            lastVisibleItem.index >= listState.layoutInfo.totalItemsCount - 3 // 3nd last item
 
         }
     }
@@ -150,7 +139,7 @@ private fun NewsList(
             state = listState
         ) {
 
-            itemsIndexed(uiState.list) { index, item ->
+            itemsIndexed(uiState.list) { _, item ->
 
                 ListItem(
                     item,
@@ -161,36 +150,41 @@ private fun NewsList(
 
             }
 
-        }
-
-        // Loading more indicator
-        if (uiState.state == HomeUiState.State.LoadingMore) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .background(Color.White.copy(alpha = 0.5f))
-                    .padding(8.dp)
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .size(20.dp),
-                    strokeWidth = 2.dp
-                )
+            // Loading more indicator
+            if (uiState.state == HomeUiState.State.LoadingMore) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .size(30.dp),
+                            strokeWidth = 1.dp
+                        )
+                    }
+                }
             }
-        }
 
-        if (uiState.state == HomeUiState.State.LoadingMoreError) {
-            Text(
-                uiState.error?.localizedMessage ?: "Unable to fetch latest stories at this time. Please try later.",
-                modifier = Modifier
-                    .align(if (uiState.list.isNullOrEmpty()) Alignment.Center else Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .background(Color.White.copy(alpha = 0.5f))
-                    .padding(8.dp),
-                textAlign = TextAlign.Center
-            )
+            if (uiState.state == HomeUiState.State.LoadingMoreError) {
+
+                item {
+                    Text(
+                        uiState.error?.localizedMessage
+                            ?: "Unable to fetch latest stories at this time. Please try later.",
+                        modifier = Modifier
+                            .align(if (uiState.list.isNullOrEmpty()) Alignment.Center else Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .background(Color.White.copy(alpha = 0.5f))
+                            .padding(8.dp),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+
         }
 
     }
@@ -230,7 +224,7 @@ private fun ListItem(
 
                 append(" posted ")
                 withStyle(SpanStyle(fontWeight = FontWeight.Medium)) {
-                    append(itemWithTimeAgo.timeAgo ?: "recently")
+                    append(itemWithTimeAgo.timeAgo)
                 }
                 append(" ago")
 
