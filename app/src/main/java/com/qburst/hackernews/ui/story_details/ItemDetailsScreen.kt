@@ -99,7 +99,7 @@ private fun ItemDetails(
             modifier = modifier
         ) {
             Text(
-                uiState.error ?: "U```q2nknown error. Please try later.",
+                uiState.error ?: "Unknown error. Please try later.",
                 modifier = Modifier
                     .align(Alignment.Center)
                     .padding(16.dp)
