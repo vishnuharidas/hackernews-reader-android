@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">HackerNews Reader</string>
+
+    <plurals name="replies">
+        <item quantity="zero">%d replies</item>
+        <item quantity="one">%d reply</item>
+        <item quantity="two">%d replies</item>
+        <item quantity="few">%d replies</item>
+        <item quantity="many">%d replies</item>
+        <item quantity="other">%d replies</item>
+    </plurals>
 </resources>
