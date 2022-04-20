@@ -246,7 +246,7 @@ private fun ItemDetails(
 
             if (!comments.isNullOrEmpty()) {
 
-                comments.filter { it.item.deleted != true }
+                comments.filter { it.item.deleted != true && it.item.dead != true }
                     .forEach {
 
                         val commentItem = it.item
