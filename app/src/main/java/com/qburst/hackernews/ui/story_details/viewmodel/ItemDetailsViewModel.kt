@@ -6,9 +6,11 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.qburst.hackernews.data.model.HNItem
 import com.qburst.hackernews.data.model.Resource
 import com.qburst.hackernews.data.repository.items.ItemsRepository
+import com.qburst.hackernews.domain.GetItemsWithTimeAgoUseCase
+import com.qburst.hackernews.domain.GetTimeAgoUseCase
+import com.qburst.hackernews.domain.model.HNItemWithTimeAgo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -18,6 +20,9 @@ class ItemDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val itemsRepository: ItemsRepository
 ) : ViewModel() {
+
+    private val getTimeAgoUseCase = GetTimeAgoUseCase()
+    private val getItemsWithTimeAgoUseCase = GetItemsWithTimeAgoUseCase(repository = itemsRepository)
 
     private val itemId: Long = savedStateHandle.get("itemId") ?: 0L
 
@@ -42,7 +47,7 @@ class ItemDetailsViewModel @Inject constructor(
             _uiState = if (item != null) {
                 _uiState.copy(
                     state = ItemDetailsUiState.State.Success,
-                    item = item,
+                    item = HNItemWithTimeAgo(item, getTimeAgoUseCase(item.time)),
                     comments = emptyList()
                 )
             } else {
@@ -58,13 +63,13 @@ class ItemDetailsViewModel @Inject constructor(
 
     fun fetchNextComments() {
 
-        val item = _uiState.item ?: return
+        val item = _uiState.item?.item ?: return
 
         val fullIds = item.kids ?: emptyList()
 
         if (fullIds.isNullOrEmpty()) return
 
-        val loadedIds = _uiState.comments?.map { it.id } ?: emptyList()
+        val loadedIds = _uiState.comments?.map { it.item.id } ?: emptyList()
 
         // Take 10 comments, and then fetch them.
         val nextIds = fullIds - loadedIds
@@ -77,13 +82,15 @@ class ItemDetailsViewModel @Inject constructor(
                 state = ItemDetailsUiState.State.LoadingMore
             )
 
-            itemsRepository.fetchItems(nextIds.take(10)).collect {
+            getItemsWithTimeAgoUseCase(nextIds.take(10)).collect {
 
                 if (it is Resource.Success) {
 
                     _uiState = _uiState.copy(
                         state = ItemDetailsUiState.State.Success,
-                        comments = _uiState.comments?.plus(it.data)
+                        comments = _uiState.comments?.plus(
+                            it.data
+                        )
                     )
 
                 }
@@ -98,8 +105,8 @@ class ItemDetailsViewModel @Inject constructor(
 
 data class ItemDetailsUiState(
     val state: State,
-    val item: HNItem? = null,
-    val comments: List<HNItem>? = null,
+    val item: HNItemWithTimeAgo? = null,
+    val comments: List<HNItemWithTimeAgo>? = null,
     val error: String? = null
 ) {
     sealed class State {

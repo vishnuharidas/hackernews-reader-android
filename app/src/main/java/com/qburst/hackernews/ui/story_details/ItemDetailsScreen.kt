@@ -32,7 +32,6 @@ import androidx.navigation.NavHostController
 import com.qburst.hackernews.R
 import com.qburst.hackernews.data.model.HNItemType
 import com.qburst.hackernews.data.model.getTypeValue
-import com.qburst.hackernews.domain.GetTimeAgoUseCase
 import com.qburst.hackernews.ui.story_details.viewmodel.ItemDetailsUiState
 import com.qburst.hackernews.ui.story_details.viewmodel.ItemDetailsViewModel
 
@@ -47,7 +46,7 @@ fun ItemDetailsScreen(
         modifier = Modifier.fillMaxSize()
     ) {
 
-        when (val state = viewModel.uiState.state) {
+        when (viewModel.uiState.state) {
 
             ItemDetailsUiState.State.Loading ->
                 CircularProgressIndicator(
@@ -91,10 +90,12 @@ private fun ItemDetails(
     onNextPage: () -> Unit
 ) {
 
-    val item = uiState.item
+    val itemWithTimeAgo = uiState.item
+
+    val hnItem = itemWithTimeAgo?.item
     val comments = uiState.comments
 
-    if (item == null) {
+    if (hnItem == null) {
         Box(
             modifier = modifier
         ) {
@@ -148,27 +149,27 @@ private fun ItemDetails(
                     verticalAlignment = Alignment.Top
                 ) {
 
-                    if (!item.title.isNullOrEmpty()) {
+                    if (!hnItem.title.isNullOrEmpty()) {
                         Text(
-                            item.title ?: "-",
+                            hnItem.title,
                             style = TextStyle(
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Normal
                             ),
                             modifier = Modifier
                                 .weight(1f)
-                                .padding(end = if (item.url != null) 8.dp else 0.dp)
+                                .padding(end = if (hnItem.url != null) 8.dp else 0.dp)
                         )
                     }
 
-                    if (item.url != null) {
+                    if (hnItem.url != null) {
                         IconButton(
                             onClick = {
 
-                                if (item.getTypeValue() == HNItemType.Story
-                                    && item.title?.startsWith("Ask HN:") == false /* Ask HN will be opened in a screen */) {
+                                if (hnItem.getTypeValue() == HNItemType.Story
+                                    && hnItem.title?.startsWith("Ask HN:") == false /* Ask HN will be opened in a screen */) {
                                     context.startActivity(
-                                        Intent(Intent.ACTION_VIEW, Uri.parse(item.url))
+                                        Intent(Intent.ACTION_VIEW, Uri.parse(hnItem.url))
                                     )
                                 }
 
@@ -188,27 +189,27 @@ private fun ItemDetails(
             item {
                 val meta = buildAnnotatedString {
 
-                    if (item.score != null) {
-                        append(item.score.toString())
+                    if (hnItem.score != null) {
+                        append(hnItem.score.toString())
                         append(" points ")
                     }
 
                     append("by ")
                     withStyle(SpanStyle(fontWeight = FontWeight.Medium)) {
-                        append(item.by ?: "Unknown")
+                        append(hnItem.by ?: "Unknown")
                     }
 
                     append(" posted ")
                     withStyle(SpanStyle(fontWeight = FontWeight.Medium)) {
-                        append(GetTimeAgoUseCase(item.time))
+                        append(itemWithTimeAgo.timeAgo)
                     }
                     append(" ago")
 
                     append("  \uD83D\uDCAC ")
-                    if (item.getTypeValue() == HNItemType.Comment) {
-                        append(item.kids?.size?.toString() ?: "no replies")
+                    if (hnItem.getTypeValue() == HNItemType.Comment) {
+                        append(hnItem.kids?.size?.toString() ?: "no replies")
                     } else {
-                        append(item.descendants?.toString() ?: "no comments")
+                        append(hnItem.descendants?.toString() ?: "no comments")
                     }
                 }
 
@@ -221,10 +222,10 @@ private fun ItemDetails(
                 )
             }
 
-            if (!item.text.isNullOrBlank()) { // "Ask HN" post will have text
+            if (!hnItem.text.isNullOrBlank()) { // "Ask HN" post will have text
                 item {
                     Text(
-                        Html.fromHtml(item.text, Html.FROM_HTML_MODE_LEGACY).toString(),
+                        Html.fromHtml(hnItem.text, Html.FROM_HTML_MODE_LEGACY).toString(),
                         style = TextStyle(
                             fontSize = 18.sp
                         ),
@@ -245,8 +246,10 @@ private fun ItemDetails(
 
             if (!comments.isNullOrEmpty()) {
 
-                comments.filter { it.deleted != true }
-                    .forEach { comment ->
+                comments.filter { it.item.deleted != true }
+                    .forEach {
+
+                        val commentItem = it.item
 
                         item {
 
@@ -260,17 +263,17 @@ private fun ItemDetails(
 
                                     append("by ")
                                     withStyle(SpanStyle(fontWeight = FontWeight.Medium)) {
-                                        append(comment.by ?: "Unknown")
+                                        append(commentItem.by ?: "Unknown")
                                     }
 
                                     append(" ")
                                     withStyle(SpanStyle(fontWeight = FontWeight.Medium)) {
-                                        append(GetTimeAgoUseCase(comment.time))
+                                        append(it.timeAgo)
                                     }
 
-                                    if (comment.kids?.size ?: 0 > 0) {
+                                    if (commentItem.kids?.size ?: 0 > 0) {
                                         append(" ")
-                                        append(comment.kids?.size?.toString() ?: "0")
+                                        append(commentItem.kids?.size?.toString() ?: "0")
                                         append(" replies")
                                     }
 
@@ -286,7 +289,7 @@ private fun ItemDetails(
                                 )
 
                                 Text(
-                                    Html.fromHtml(comment.text ?: "---", Html.FROM_HTML_MODE_LEGACY).toString(),
+                                    Html.fromHtml(commentItem.text ?: "---", Html.FROM_HTML_MODE_LEGACY).toString(),
                                     style = TextStyle(
                                         fontSize = 15.sp
                                     ),
@@ -295,14 +298,14 @@ private fun ItemDetails(
                                         .padding(top = 8.dp)
                                 )
 
-                                if (comment.kids?.size ?: 0 > 0) {
+                                if (commentItem.kids?.size ?: 0 > 0) {
 
                                     Text(
                                         "view ${
                                             context.resources.getQuantityString(
                                                 R.plurals.replies,
-                                                comment.kids?.size ?: 0,
-                                                comment.kids?.size ?: 0
+                                                commentItem.kids?.size ?: 0,
+                                                commentItem.kids?.size ?: 0
                                             )
                                         } ➡",
                                         modifier = Modifier
@@ -311,7 +314,7 @@ private fun ItemDetails(
                                             .clip(RoundedCornerShape(40.dp))
                                             .clickable {
 
-                                                navController.navigate("details/${comment.id}")
+                                                navController.navigate("details/${commentItem.id}")
                                             }
                                             .padding(vertical = 4.dp, horizontal = 8.dp)
 
