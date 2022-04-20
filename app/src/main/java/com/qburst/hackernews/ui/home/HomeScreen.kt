@@ -139,9 +139,10 @@ private fun NewsList(
             state = listState
         ) {
 
-            itemsIndexed(uiState.list) { _, item ->
+            itemsIndexed(uiState.list) { index, item ->
 
                 ListItem(
+                    index + 1,
                     item,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -192,6 +193,7 @@ private fun NewsList(
 
 @Composable
 private fun ListItem(
+    index: Int,
     itemWithTimeAgo: HNItemWithTimeAgo,
     modifier: Modifier = Modifier
 ) {
@@ -206,7 +208,7 @@ private fun ListItem(
         ) {
 
             Text(
-                itemWithTimeAgo.item.title ?: "-",
+                "$index. ${itemWithTimeAgo.item.title ?: "<no title>"}",
                 style = TextStyle(
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Normal
