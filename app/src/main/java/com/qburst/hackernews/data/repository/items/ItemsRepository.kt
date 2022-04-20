@@ -48,7 +48,7 @@ class ItemsRepository @Inject constructor(
 
     suspend fun fetchItems(ids: List<Long>, force: Boolean = false) = flow {
 
-        val list = mutableListOf<HNItem>()
+        val map = mutableMapOf<Long, HNItem>()
 
         coroutineScope {
 
@@ -62,11 +62,13 @@ class ItemsRepository @Inject constructor(
                         // Keep a local copy for future use
                         localSource.saveItem(hnItem)
 
-                        list.add(item)
+                        map.putIfAbsent(item.id, item)
                     }
                 }
             }
         }
+
+        val list = ids.mapNotNull { map[it] }
 
         if (ids.size == list.size) {
             emit(Resource.Success(list.toList()))
