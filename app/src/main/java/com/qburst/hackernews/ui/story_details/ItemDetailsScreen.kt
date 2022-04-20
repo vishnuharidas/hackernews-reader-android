@@ -10,12 +10,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowForward
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
@@ -27,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.qburst.hackernews.R
 import com.qburst.hackernews.data.model.HNItemType
 import com.qburst.hackernews.data.model.getTypeValue
 import com.qburst.hackernews.domain.GetTimeAgoUseCase
@@ -145,16 +148,18 @@ private fun ItemDetails(
                     verticalAlignment = Alignment.Top
                 ) {
 
-                    Text(
-                        item.title ?: "-",
-                        style = TextStyle(
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Normal
-                        ),
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(end = if (item.url != null) 8.dp else 0.dp)
-                    )
+                    if (!item.title.isNullOrEmpty()) {
+                        Text(
+                            item.title ?: "-",
+                            style = TextStyle(
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Normal
+                            ),
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(end = if (item.url != null) 8.dp else 0.dp)
+                        )
+                    }
 
                     if (item.url != null) {
                         IconButton(
@@ -183,9 +188,12 @@ private fun ItemDetails(
             item {
                 val meta = buildAnnotatedString {
 
-                    append(item.score?.toString() ?: "0")
-                    append(" points")
-                    append(" by ")
+                    if (item.score != null) {
+                        append(item.score.toString())
+                        append(" points ")
+                    }
+
+                    append("by ")
                     withStyle(SpanStyle(fontWeight = FontWeight.Medium)) {
                         append(item.by ?: "Unknown")
                     }
@@ -197,7 +205,11 @@ private fun ItemDetails(
                     append(" ago")
 
                     append("  \uD83D\uDCAC ")
-                    append(item.descendants?.toString() ?: "no comments")
+                    if (item.getTypeValue() == HNItemType.Comment) {
+                        append(item.kids?.size?.toString() ?: "no replies")
+                    } else {
+                        append(item.descendants?.toString() ?: "no comments")
+                    }
                 }
 
                 Text(
@@ -283,6 +295,30 @@ private fun ItemDetails(
                                         .padding(top = 8.dp)
                                 )
 
+                                if (comment.kids?.size ?: 0 > 0) {
+
+                                    Text(
+                                        "view ${
+                                            context.resources.getQuantityString(
+                                                R.plurals.replies,
+                                                comment.kids?.size ?: 0,
+                                                comment.kids?.size ?: 0
+                                            )
+                                        } ➡",
+                                        modifier = Modifier
+                                            .padding(start = 16.dp, top = 8.dp)
+                                            .border(1.dp, Color.LightGray, RoundedCornerShape(40.dp))
+                                            .clip(RoundedCornerShape(40.dp))
+                                            .clickable {
+
+                                                navController.navigate("details/${comment.id}")
+                                            }
+                                            .padding(vertical = 4.dp, horizontal = 8.dp)
+
+                                    )
+
+                                }
+
                             }
 
                         }
@@ -295,25 +331,26 @@ private fun ItemDetails(
 
             }
 
-        }
-
-
-        // Loading more indicator
-        if (uiState.state == ItemDetailsUiState.State.LoadingMore) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .background(Color.White.copy(alpha = 0.5f))
-                    .padding(8.dp)
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .size(20.dp),
-                    strokeWidth = 2.dp
-                )
+            // Loading more indicator
+            if (uiState.state == ItemDetailsUiState.State.LoadingMore) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .background(Color.White.copy(alpha = 0.5f))
+                            .padding(8.dp)
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .size(20.dp),
+                            strokeWidth = 2.dp
+                        )
+                    }
+                }
             }
+
         }
 
     }
