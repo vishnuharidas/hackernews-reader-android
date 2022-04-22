@@ -1,4 +1,4 @@
-package com.qburst.hackernews
+package com.qburst.hackernews.ui
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
