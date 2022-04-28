@@ -3,7 +3,6 @@ package com.qburst.hackernews.data.repository.items.remote
 import com.qburst.hackernews.data.model.HNItem
 import com.qburst.hackernews.data.model.HNTopStories
 import com.qburst.hackernews.data.model.Resource
-import com.qburst.hackernews.data.repository.HackerNewsApi
 import retrofit2.Response
 import javax.inject.Inject
 

@@ -1,6 +1,6 @@
 package com.qburst.hackernews.di
 
-import com.qburst.hackernews.data.repository.HackerNewsApi
+import com.qburst.hackernews.data.repository.items.remote.HackerNewsApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
