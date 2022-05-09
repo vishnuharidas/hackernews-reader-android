@@ -67,14 +67,14 @@ class ItemDetailsViewModel @Inject constructor(
 
         val fullIds = item.kids ?: emptyList()
 
-        if (fullIds.isNullOrEmpty()) return
+        if (fullIds.isEmpty()) return
 
         val loadedIds = _uiState.comments?.map { it.item.id } ?: emptyList()
 
         // Take 10 comments, and then fetch them.
-        val nextIds = fullIds - loadedIds
+        val nextIds = fullIds - loadedIds.toSet()
 
-        if (nextIds.isNullOrEmpty()) return
+        if (nextIds.isEmpty()) return
 
         viewModelScope.launch {
 
