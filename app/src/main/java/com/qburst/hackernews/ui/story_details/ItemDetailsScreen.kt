@@ -255,7 +255,9 @@ private fun ItemDetails(
 
                             Column(
                                 modifier
-                                    .clickable { }
+                                    .clickable {
+                                        navController.navigate("details/${commentItem.id}")
+                                    }
                                     .padding(vertical = 16.dp)
                             ) {
 
