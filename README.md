@@ -6,6 +6,8 @@ This project is written to explore the new [recommended architecture](https://de
 
 The project is split into three main layers —UI, Domain, and Data— as per the recommendation.
 
+Read the related [blog post here](https://blog.qburst.com/2022/05/exploring-the-new-architecture-for-android-apps/).
+
 ### Architecture
 
 ![Architecture](media/architecture.png "Architecture")
