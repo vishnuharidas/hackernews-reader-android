@@ -25,6 +25,7 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowForward
+import androidx.compose.material.icons.outlined.KeyboardArrowRight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -448,6 +449,14 @@ internal fun LinksListItem(
             text,
             modifier = Modifier
                 .weight(1.0f)
+        )
+
+        Icon(
+            Icons.Outlined.KeyboardArrowRight,
+            tint = Color.Gray,
+            contentDescription = "Open Link in Browser",
+            modifier = Modifier
+                .padding(start = 4.dp),
         )
 
     }
