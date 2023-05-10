@@ -228,7 +228,6 @@ private fun ListItem(
                 withStyle(SpanStyle(fontWeight = FontWeight.Medium)) {
                     append(itemWithTimeAgo.timeAgo)
                 }
-                append(" ago")
 
                 append("  \uD83D\uDCAC ")
                 append(itemWithTimeAgo.item.descendants?.toString() ?: "no comments")

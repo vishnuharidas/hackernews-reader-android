@@ -221,7 +221,6 @@ private fun ItemDetails(
                     withStyle(SpanStyle(fontWeight = FontWeight.Medium)) {
                         append(itemWithTimeAgo.timeAgo)
                     }
-                    append(" ago")
 
                     append("  \uD83D\uDCAC ")
                     if (hnItem.getTypeValue() == HNItemType.Comment) {
