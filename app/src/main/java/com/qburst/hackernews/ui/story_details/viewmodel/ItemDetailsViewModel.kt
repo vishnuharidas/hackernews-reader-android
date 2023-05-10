@@ -9,7 +9,9 @@ import androidx.lifecycle.viewModelScope
 import com.qburst.hackernews.data.model.Resource
 import com.qburst.hackernews.data.repository.items.ItemsRepository
 import com.qburst.hackernews.domain.GetItemsWithTimeAgoUseCase
+import com.qburst.hackernews.domain.GetLinksUseCase
 import com.qburst.hackernews.domain.GetTimeAgoUseCase
+import com.qburst.hackernews.domain.model.HNItemWithMeta
 import com.qburst.hackernews.domain.model.HNItemWithTimeAgo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -23,6 +25,7 @@ class ItemDetailsViewModel @Inject constructor(
 
     private val getTimeAgoUseCase = GetTimeAgoUseCase()
     private val getItemsWithTimeAgoUseCase = GetItemsWithTimeAgoUseCase(repository = itemsRepository)
+    private val getLinksUseCase: GetLinksUseCase = GetLinksUseCase()
 
     private val itemId: Long = savedStateHandle.get("itemId") ?: 0L
 
@@ -47,7 +50,11 @@ class ItemDetailsViewModel @Inject constructor(
             _uiState = if (item != null) {
                 _uiState.copy(
                     state = ItemDetailsUiState.State.Success,
-                    item = HNItemWithTimeAgo(item, getTimeAgoUseCase(item.time)),
+                    item = HNItemWithMeta(
+                        item,
+                        getTimeAgoUseCase(item.time),
+                        getLinksUseCase(item.text)
+                    ),
                     comments = emptyList()
                 )
             } else {
@@ -105,7 +112,7 @@ class ItemDetailsViewModel @Inject constructor(
 
 data class ItemDetailsUiState(
     val state: State,
-    val item: HNItemWithTimeAgo? = null,
+    val item: HNItemWithMeta? = null,
     val comments: List<HNItemWithTimeAgo>? = null,
     val error: String? = null
 ) {

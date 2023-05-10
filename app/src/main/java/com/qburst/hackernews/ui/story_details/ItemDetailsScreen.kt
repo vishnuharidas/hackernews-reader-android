@@ -6,15 +6,30 @@ import android.text.Html
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Divider
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowForward
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,8 +38,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -34,6 +51,7 @@ import com.qburst.hackernews.data.model.HNItemType
 import com.qburst.hackernews.data.model.getTypeValue
 import com.qburst.hackernews.ui.story_details.viewmodel.ItemDetailsUiState
 import com.qburst.hackernews.ui.story_details.viewmodel.ItemDetailsViewModel
+import com.qburst.hackernews.ui.theme.HackerNewsReaderTheme
 
 @Composable
 fun ItemDetailsScreen(
@@ -236,6 +254,51 @@ private fun ItemDetails(
                 }
             }
 
+            // Links in the post
+            if (!itemWithTimeAgo.links.isNullOrEmpty()) {
+
+                item {
+                    Divider(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .padding(vertical = 16.dp)
+                    )
+                }
+
+                item {
+                    Text(
+                        "Links (${itemWithTimeAgo.links.size}):",
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontStyle = FontStyle.Italic
+                        ),
+                        modifier = Modifier
+                            .padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
+
+                    )
+                }
+
+                itemWithTimeAgo.links.forEachIndexed { index, it ->
+
+                    item {
+                        LinksListItem(
+                            index = index + 1,
+                            text = it,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    context.startActivity(
+                                        Intent(Intent.ACTION_VIEW, Uri.parse(it))
+                                    )
+                                }
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                        )
+                    }
+                }
+            }
+
+
             item {
                 Divider(
                     modifier = Modifier
@@ -358,5 +421,54 @@ private fun ItemDetails(
 
         }
 
+    }
+}
+
+@Composable
+internal fun LinksListItem(
+    index: Int,
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        Text(
+            "$index",
+            style = TextStyle(
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            ),
+            modifier = Modifier
+                .padding(end = 12.dp)
+        )
+
+        Text(
+            text,
+            modifier = Modifier
+                .weight(1.0f)
+        )
+
+    }
+}
+
+@Preview
+@Composable
+fun LinksListItemPreview() {
+    Surface {
+        HackerNewsReaderTheme {
+            LinksListItem(
+                index = 1,
+                text = "https://news.ycombinator.com/a-long-long-path/with-a-long-long-stub",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        //
+                    }
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+            )
+        }
     }
 }
