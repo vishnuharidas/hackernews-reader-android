@@ -40,7 +40,11 @@ class MainActivity : ComponentActivity() {
 
 
                         composable("home") {
-                            HomeScreen(navController)
+                            HomeScreen(
+                                onDetails = { id ->
+                                    navController.navigate("details/$id")
+                                }
+                            )
                         }
 
                         composable(
@@ -48,7 +52,9 @@ class MainActivity : ComponentActivity() {
                             arguments = listOf(navArgument("itemId") { type = NavType.LongType })
                         ) {
                             ItemDetailsScreen(
-                                navController,
+                                onDetailsClick = { id ->
+                                    navController.navigate("details/$id")
+                                },
                                 it.arguments?.getLong("itemId") ?: 0L
                             )
                         }

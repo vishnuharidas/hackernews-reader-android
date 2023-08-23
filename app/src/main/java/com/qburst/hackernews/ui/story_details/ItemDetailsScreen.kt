@@ -46,7 +46,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
 import com.qburst.hackernews.R
 import com.qburst.hackernews.data.model.HNItemType
 import com.qburst.hackernews.data.model.getTypeValue
@@ -56,7 +55,7 @@ import com.qburst.hackernews.ui.theme.HackerNewsReaderTheme
 
 @Composable
 fun ItemDetailsScreen(
-    navController: NavHostController,
+    onDetailsClick: (itemId: Long) -> Unit,
     itemId: Long,
     viewModel: ItemDetailsViewModel = hiltViewModel()
 ) {
@@ -85,7 +84,7 @@ fun ItemDetailsScreen(
             ItemDetailsUiState.State.LoadingMore,
             is ItemDetailsUiState.State.Success -> {
                 ItemDetails(
-                    navController = navController,
+                    onDetailsClick = onDetailsClick,
                     uiState = viewModel.uiState,
                     modifier = Modifier.fillMaxSize(),
                     onNextPage = {
@@ -103,7 +102,7 @@ fun ItemDetailsScreen(
 
 @Composable
 private fun ItemDetails(
-    navController: NavHostController,
+    onDetailsClick: (itemId: Long) -> Unit,
     uiState: ItemDetailsUiState,
     modifier: Modifier = Modifier,
     onNextPage: () -> Unit
@@ -319,7 +318,7 @@ private fun ItemDetails(
                             Column(
                                 modifier
                                     .clickable {
-                                        navController.navigate("details/${commentItem.id}")
+                                        onDetailsClick(commentItem.id)
                                     }
                                     .padding(vertical = 16.dp)
                             ) {
@@ -378,8 +377,7 @@ private fun ItemDetails(
                                             .border(1.dp, Color.LightGray, RoundedCornerShape(40.dp))
                                             .clip(RoundedCornerShape(40.dp))
                                             .clickable {
-
-                                                navController.navigate("details/${commentItem.id}")
+                                                onDetailsClick(commentItem.id)
                                             }
                                             .padding(vertical = 4.dp, horizontal = 8.dp)
 
