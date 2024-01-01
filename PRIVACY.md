@@ -23,6 +23,6 @@ You are advised to review this Privacy Policy periodically for any changes. Chan
 
 ## 5. Contact Us
 
-If you have any questions about this Privacy Policy, please contact us at <contact> at my domain name.
+If you have any questions about this Privacy Policy, please contact us at "contact" at my domain name.
 
 This Privacy Policy was created on 01 JAN 2024
